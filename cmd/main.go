@@ -46,13 +46,21 @@ func main() {
 			continue
 		}
 
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
+		if !update.Message.IsCommand() {
+			continue
+		}
 
-		switch update.Message.Text {
-		case "open":
-			msg.ReplyMarkup = numericKeyboard
-		case "close":
-			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
+
+		switch update.Message.Command() {
+		case "help":
+			msg.Text = "I understand /sayhi and /status"
+		case "sayhi":
+			msg.Text = "Hey :)"
+		case "status":
+			msg.Text = "Im okey, thank you!"
+		default:
+			msg.Text = "I dont know that command :("
 		}
 
 		if _, err := bot.Send(msg); err != nil {
