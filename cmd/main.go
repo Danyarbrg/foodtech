@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -9,29 +8,27 @@ import (
 	"github.com/joho/godotenv"
 )
 
-var numericKeyboard = tgbotapi.NewReplyKeyboard(
-	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("1"),
-		tgbotapi.NewKeyboardButton("2"),
-		tgbotapi.NewKeyboardButton("3"),
+var numericKeyboard = tgbotapi.NewInlineKeyboardMarkup(
+	tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonURL("localhost", "http://127.0.0.1:8080/home"),
+		tgbotapi.NewInlineKeyboardButtonData("2", "2"),
+		tgbotapi.NewInlineKeyboardButtonData("3", "3"),
 	),
-	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("4"),
-		tgbotapi.NewKeyboardButton("5"),
-		tgbotapi.NewKeyboardButton("6"),
+	tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData("4", "4"),
+		tgbotapi.NewInlineKeyboardButtonData("5", "5"),
+		tgbotapi.NewInlineKeyboardButtonData("6", "6"),
 	),
 )
 
 func main() {
 	godotenv.Load()
 	token := os.Getenv("BOT_TOKEN")
-	fmt.Println(token)
 
 	bot, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
 		log.Panic(err)
 	}
-
 	bot.Debug = true
 
 	log.Printf("Authorized on account %s", bot.Self.UserName)
@@ -41,30 +38,38 @@ func main() {
 
 	updates := bot.GetUpdatesChan(u)
 
+	// Loop through each update.
 	for update := range updates {
-		if update.Message == nil {
-			continue
-		}
+		// Check if we've gotten a message update.
+		if update.Message != nil {
+			// Construct a new message from the given chat ID and containing
+			// the text that we received.
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
 
-		if !update.Message.IsCommand() {
-			continue
-		}
+			// If the message was open, add a copy of our numeric keyboard.
+			switch update.Message.Text {
+			case "open":
+				msg.ReplyMarkup = numericKeyboard
 
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
+			}
 
-		switch update.Message.Command() {
-		case "help":
-			msg.Text = "I understand /sayhi and /status"
-		case "sayhi":
-			msg.Text = "Hey :)"
-		case "status":
-			msg.Text = "Im okey, thank you!"
-		default:
-			msg.Text = "I dont know that command :("
-		}
+			// Send the message.
+			if _, err = bot.Send(msg); err != nil {
+				panic(err)
+			}
+		} else if update.CallbackQuery != nil {
+			// Respond to the callback query, telling Telegram to show the user
+			// a message with the data received.
+			callback := tgbotapi.NewCallback(update.CallbackQuery.ID, update.CallbackQuery.Data)
+			if _, err := bot.Request(callback); err != nil {
+				panic(err)
+			}
 
-		if _, err := bot.Send(msg); err != nil {
-			log.Panic(err)
+			// And finally, send a message containing the data received.
+			msg := tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Data)
+			if _, err := bot.Send(msg); err != nil {
+				panic(err)
+			}
 		}
 	}
 }
