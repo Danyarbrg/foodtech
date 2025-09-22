@@ -1,8 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
+
+	ts "github.com/Danyarbrg/foodtech/test-server"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/joho/godotenv"
@@ -10,7 +13,7 @@ import (
 
 var numericKeyboard = tgbotapi.NewInlineKeyboardMarkup(
 	tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonURL("localhost", "http://127.0.0.1:8080/home"),
+		tgbotapi.NewInlineKeyboardButtonURL("localhost", "127.0.0.1:3002/home"),
 		tgbotapi.NewInlineKeyboardButtonData("2", "2"),
 		tgbotapi.NewInlineKeyboardButtonData("3", "3"),
 	),
@@ -22,6 +25,9 @@ var numericKeyboard = tgbotapi.NewInlineKeyboardMarkup(
 )
 
 func main() {
+	go ts.Server()
+
+	fmt.Println("------------")
 	godotenv.Load()
 	token := os.Getenv("BOT_TOKEN")
 
