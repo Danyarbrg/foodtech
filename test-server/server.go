@@ -19,5 +19,5 @@ func Server() http.Handler {
 }
 
 func home(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Heeeeey!\n"))
+	w.Write([]byte("Heeeeey! Semeeeeeeeen\n"))
 }

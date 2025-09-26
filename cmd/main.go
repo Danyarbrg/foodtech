@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -14,7 +13,7 @@ import (
 var numericKeyboard = tgbotapi.NewInlineKeyboardMarkup(
 	tgbotapi.NewInlineKeyboardRow(
 		tgbotapi.NewInlineKeyboardButtonURL("localhost", "127.0.0.1:3002/home"),
-		tgbotapi.NewInlineKeyboardButtonData("2", "2"),
+		tgbotapi.NewInlineKeyboardButtonData("privet", "andrey"),
 		tgbotapi.NewInlineKeyboardButtonData("3", "3"),
 	),
 	tgbotapi.NewInlineKeyboardRow(
@@ -27,7 +26,6 @@ var numericKeyboard = tgbotapi.NewInlineKeyboardMarkup(
 func main() {
 	go ts.Server()
 
-	fmt.Println("------------")
 	godotenv.Load()
 	token := os.Getenv("BOT_TOKEN")
 
